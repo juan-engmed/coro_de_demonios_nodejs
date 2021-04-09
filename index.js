@@ -1,6 +1,18 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const connection = require('./database/database');
+const Pergunta = require('./database/Pergunta');
+
+//DATABASE
+connection
+    .authenticate()
+    .then(()=>{
+        console.log("Conexão DB com sucesso")
+    })
+    .catch((msgErro)=>{
+        console.log(msgErro);
+    })
 
 //Definindo o EJS
 app.set('view engine', 'ejs');
@@ -12,9 +24,17 @@ app.use(express.static('public'));
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
-//ROTAS DA APLICAÇÃO
+// ==== ROTAS DA APLICAÇÃO ====
 app.get('/', (req,res)=>{
-    res.render('index');
+
+    //Metodo para buscar tudo no banco
+    Pergunta.findAll({ raw: true, order:[['id','DESC' ]]
+    }).then(perguntas => {
+        res.render('index', {
+            perguntas: perguntas
+        });
+    });
+    
 });
 
 app.get('/perguntar',(req,res)=>{
@@ -24,16 +44,40 @@ app.get('/perguntar',(req,res)=>{
 
 //Recebendo dados do formulário 
 app.post('/salvarpergunta',(req,res)=>{
+
     let titulo = req.body.titulo;
     let descricao = req.body.descricao;
 
-    res.send(` Titulo: ${titulo} e Descricao ${descricao}`)
-})
+    //Método para salvar na tabela
+    Pergunta.create({
+        titulo: titulo,
+        descricao: descricao
+    }).then(()=>{
+        res.redirect('/');
+    }).catch(()=>{
+        res.send('Dados não salvos');
+    })
+});
+
+app.get('/pergunta/:id', (req,res)=>{
+    let id = req.params.id;
+    Pergunta.findOne({
+        where: {id : id}
+    }).then(pergunta =>{
+        if(pergunta != undefined){
+            res.render('pergunta',{
+                pergunta: pergunta
+            });
+        }else{ //ID da pergunta nao encontrada
+            res.redirect('/')
+        }
+    })
+});
 
 
 
-//Iniciando Servidor
-app.listen(8081, ()=>{
+// === INICIANDO SERVIDOR === 
+app.listen(7000, ()=>{
     console.log('Servidor Rodando')
 });
 
