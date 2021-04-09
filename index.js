@@ -3,7 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const connection = require('./database/database');
 const Pergunta = require('./database/Pergunta');
-
+const Resposta = require('./database/Resposta');
 //DATABASE
 connection
     .authenticate()
@@ -74,7 +74,21 @@ app.get('/pergunta/:id', (req,res)=>{
     })
 });
 
+app.post('/salvarresposta',(req,res)=>{
+    
+    let corpo = req.body.corpo;
+    let perguntaId = req.body.pergunta;
 
+     //Método para salvar na tabela
+     Resposta.create({
+        corpo: corpo,
+        perguntaId: perguntaId
+    }).then(()=>{
+        res.redirect('/');
+    }).catch(()=>{
+        res.send('Dados não salvos');
+    })
+})
 
 // === INICIANDO SERVIDOR === 
 app.listen(7000, ()=>{

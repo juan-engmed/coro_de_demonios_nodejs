@@ -11,6 +11,15 @@
         <h5> <%= pergunta.descricao %> </h5>
         <hr>
 
+        <form action="/salvarresposta" method="POST">
+            <label for="corpo">Resposta:</label>
+        <textarea name="corpo" class='form-control' id="" cols="30" rows="2" placeholder="Digite sua Resposta"></textarea>
+        <input type="hidden" name="pergunta" value="<%= pergunta.id%>">
+        <br>
+        <button type='submit' class='btn btn-primary'>Enviar Resposta</button>
+        
+        </form>
+
     </div>  
 
 
